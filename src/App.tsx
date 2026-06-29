@@ -1,17 +1,27 @@
-import type { CSSProperties } from 'react'
 import { useMemo, useState } from 'react'
 import {
-  AlertTriangle,
-  Archive,
-  BarChart3,
-  Boxes,
-  CheckCircle2,
-  PackagePlus,
-  RefreshCcw,
-  Search,
-  ShoppingBag,
-  Truck,
-} from 'lucide-react'
+  CBadge,
+  CButton,
+  CButtonGroup,
+  CCard,
+  CCardBody,
+  CCardHeader,
+  CCol,
+  CContainer,
+  CFormInput,
+  CInputGroup,
+  CInputGroupText,
+  CProgress,
+  CProgressBar,
+  CRow,
+  CTable,
+  CTableBody,
+  CTableDataCell,
+  CTableHead,
+  CTableHeaderCell,
+  CTableRow,
+} from '@coreui/react'
+import '@coreui/coreui/dist/css/coreui.min.css'
 import './App.css'
 
 type ProductStatus = 'Healthy' | 'Low stock' | 'Backorder' | 'Review'
@@ -93,16 +103,10 @@ const currency = new Intl.NumberFormat('en-US', {
   style: 'currency',
 })
 
-const theme = {
-  '--accent': '#0f766e',
-  '--accent-2': '#2563eb',
-  '--accent-3': '#eab308',
-} as CSSProperties
-
-function getStatusClass(status: ProductStatus | Order['state']) {
-  if (status === 'Healthy' || status === 'Shipped') return 'good'
-  if (status === 'Low stock' || status === 'Picking') return 'warn'
-  if (status === 'Backorder') return 'bad'
+function badgeColor(status: ProductStatus | Order['state']) {
+  if (status === 'Healthy' || status === 'Shipped') return 'success'
+  if (status === 'Backorder') return 'danger'
+  if (status === 'Low stock' || status === 'Picking') return 'warning'
   return 'info'
 }
 
@@ -135,222 +139,169 @@ function App() {
   )
 
   return (
-    <main className="app" style={theme}>
-      <div className="app-shell">
-        <header className="topbar">
-          <div className="brand">
-            <span className="brand-mark">
-              <Boxes size={22} aria-hidden="true" />
-            </span>
-            <div>
-              <h1>Stockroom</h1>
-              <p>Commerce operations console</p>
-            </div>
+    <main className="stockroom-app">
+      <CContainer fluid className="stockroom-shell">
+        <div className="stockroom-topbar">
+          <div>
+            <p className="text-uppercase text-medium-emphasis fw-semibold mb-1">CoreUI admin</p>
+            <h1>Stockroom</h1>
+            <p className="text-medium-emphasis mb-0">Commerce operations console</p>
           </div>
-          <div className="toolbar">
-            <button className="icon-button" type="button" aria-label="Refresh inventory">
-              <RefreshCcw size={18} aria-hidden="true" />
-            </button>
-            <button className="ghost-button" type="button">
-              <Truck size={17} aria-hidden="true" />
-              Shipments
-            </button>
-            <button className="action-button" type="button">
-              <PackagePlus size={17} aria-hidden="true" />
-              Add product
-            </button>
+          <div className="d-flex gap-2 flex-wrap">
+            <CButton color="light">Refresh inventory</CButton>
+            <CButton color="dark">Add product</CButton>
           </div>
-        </header>
+        </div>
 
-        <section className="hero-grid">
-          <div className="hero-copy">
-            <p className="eyebrow">Inventory and order desk</p>
-            <h2>Monitor product health, order flow, and replenishment from one screen.</h2>
-            <p>
-              Stockroom focuses on the back office work behind commerce: inventory
-              thresholds, order states, margin signals, and restock decisions.
-            </p>
-          </div>
-          <aside className="command-stack" aria-label="Store actions">
-            <button className="action-button" type="button">
-              <Archive size={17} aria-hidden="true" />
-              Create purchase order
-            </button>
-            <button className="ghost-button" type="button">
-              <ShoppingBag size={17} aria-hidden="true" />
-              Review orders
-            </button>
-            <button className="ghost-button" type="button">
-              <BarChart3 size={17} aria-hidden="true" />
-              Sales report
-            </button>
-          </aside>
-        </section>
+        <CRow className="g-4 mb-4">
+          <CCol md={6} xl={3}>
+            <CCard color="primary" textColor="white">
+              <CCardBody>
+                <div className="text-white-50">Units on hand</div>
+                <div className="display-6 fw-semibold">{totalStock}</div>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol md={6} xl={3}>
+            <CCard color="warning">
+              <CCardBody>
+                <div className="text-black-50">Restock watch</div>
+                <div className="display-6 fw-semibold">{lowStock}</div>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol md={6} xl={3}>
+            <CCard color="success" textColor="white">
+              <CCardBody>
+                <div className="text-white-50">Open order value</div>
+                <div className="display-6 fw-semibold">{currency.format(orderValue)}</div>
+              </CCardBody>
+            </CCard>
+          </CCol>
+          <CCol md={6} xl={3}>
+            <CCard color="info" textColor="white">
+              <CCardBody>
+                <div className="text-white-50">Average margin</div>
+                <div className="display-6 fw-semibold">{averageMargin}%</div>
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
 
-        <section className="stats-grid" aria-label="Commerce summary">
-          <article className="metric">
-            <span className="metric-icon">
-              <Boxes size={19} aria-hidden="true" />
-            </span>
-            <h3>{totalStock}</h3>
-            <p>Units on hand</p>
-          </article>
-          <article className="metric">
-            <span className="metric-icon">
-              <AlertTriangle size={19} aria-hidden="true" />
-            </span>
-            <h3>{lowStock}</h3>
-            <p>Restock watch items</p>
-          </article>
-          <article className="metric">
-            <span className="metric-icon">
-              <ShoppingBag size={19} aria-hidden="true" />
-            </span>
-            <h3>{currency.format(orderValue)}</h3>
-            <p>Open order value</p>
-          </article>
-          <article className="metric">
-            <span className="metric-icon">
-              <BarChart3 size={19} aria-hidden="true" />
-            </span>
-            <h3>{averageMargin}%</h3>
-            <p>Average margin</p>
-          </article>
-        </section>
-
-        <section className="workspace-grid">
-          <div className="panel">
-            <div className="panel-title">
-              <div>
-                <h2>Product control</h2>
-                <p>Search inventory and review stock movement.</p>
-              </div>
-            </div>
-            <div className="search-row">
-              <label className="search-box">
-                <Search size={17} aria-hidden="true" />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search products"
-                />
-              </label>
-            </div>
-            <div className="filter-row" aria-label="Product filters">
-              {filters.map((item) => (
-                <button
-                  className={`filter-pill ${filter === item ? 'active' : ''}`}
-                  key={item}
-                  onClick={() => setFilter(item)}
-                  type="button"
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-            <div className="data-table">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Product</th>
-                    <th>Category</th>
-                    <th>Stock</th>
-                    <th>Reorder</th>
-                    <th>Margin</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleProducts.map((product) => (
-                    <tr key={product.sku}>
-                      <td>
-                        <button
-                          className="row-button"
-                          type="button"
-                          onClick={() => setSelectedSku(product.sku)}
-                        >
-                          <span className="strong">{product.name}</span>
-                          <br />
-                          <span className="muted">{product.sku}</span>
-                        </button>
-                      </td>
-                      <td>{product.category}</td>
-                      <td>{product.stock}</td>
-                      <td>{product.reorder}</td>
-                      <td>{product.margin}%</td>
-                      <td>
-                        <span className={`status ${getStatusClass(product.status)}`}>
-                          {product.status}
-                        </span>
-                      </td>
-                    </tr>
+        <CRow className="g-4">
+          <CCol xl={8}>
+            <CCard>
+              <CCardHeader className="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                <div>
+                  <strong>Product control</strong>
+                  <div className="small text-medium-emphasis">
+                    Search inventory and review stock movement.
+                  </div>
+                </div>
+                <CButtonGroup role="group" aria-label="Product filters">
+                  {filters.map((item) => (
+                    <CButton
+                      color={filter === item ? 'dark' : 'secondary'}
+                      key={item}
+                      onClick={() => setFilter(item)}
+                      variant={filter === item ? undefined : 'outline'}
+                    >
+                      {item}
+                    </CButton>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </CButtonGroup>
+              </CCardHeader>
+              <CCardBody>
+                <CInputGroup className="mb-3">
+                  <CInputGroupText>Search</CInputGroupText>
+                  <CFormInput
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Product, SKU, or category"
+                  />
+                </CInputGroup>
+                <CTable align="middle" hover responsive>
+                  <CTableHead color="light">
+                    <CTableRow>
+                      <CTableHeaderCell>Product</CTableHeaderCell>
+                      <CTableHeaderCell>Category</CTableHeaderCell>
+                      <CTableHeaderCell>Stock</CTableHeaderCell>
+                      <CTableHeaderCell>Reorder</CTableHeaderCell>
+                      <CTableHeaderCell>Margin</CTableHeaderCell>
+                      <CTableHeaderCell>Status</CTableHeaderCell>
+                    </CTableRow>
+                  </CTableHead>
+                  <CTableBody>
+                    {visibleProducts.map((product) => (
+                      <CTableRow key={product.sku} onClick={() => setSelectedSku(product.sku)}>
+                        <CTableDataCell>
+                          <div className="fw-semibold">{product.name}</div>
+                          <div className="small text-medium-emphasis">{product.sku}</div>
+                        </CTableDataCell>
+                        <CTableDataCell>{product.category}</CTableDataCell>
+                        <CTableDataCell>{product.stock}</CTableDataCell>
+                        <CTableDataCell>{product.reorder}</CTableDataCell>
+                        <CTableDataCell>{product.margin}%</CTableDataCell>
+                        <CTableDataCell>
+                          <CBadge color={badgeColor(product.status)}>{product.status}</CBadge>
+                        </CTableDataCell>
+                      </CTableRow>
+                    ))}
+                  </CTableBody>
+                </CTable>
+              </CCardBody>
+            </CCard>
+          </CCol>
 
-          <aside className="panel">
-            <div className="panel-title">
-              <div>
-                <h2>{selected.name}</h2>
-                <p>{selected.sku} replenishment view</p>
-              </div>
-              <span className={`status ${getStatusClass(selected.status)}`}>
-                {selected.status}
-              </span>
-            </div>
-            <div className="detail-stack">
-              <div className="mini-grid">
-                <div className="mini-stat">
-                  <p>Velocity</p>
+          <CCol xl={4}>
+            <CCard className="mb-4">
+              <CCardHeader>
+                <strong>{selected.name}</strong>
+                <div className="small text-medium-emphasis">{selected.sku}</div>
+              </CCardHeader>
+              <CCardBody>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Sales velocity</span>
                   <strong>{selected.velocity}%</strong>
                 </div>
-                <div className="mini-stat">
-                  <p>Margin</p>
+                <CProgress className="mb-4">
+                  <CProgressBar value={selected.velocity} color={badgeColor(selected.status)} />
+                </CProgress>
+                <div className="d-flex justify-content-between mb-2">
+                  <span>Margin</span>
                   <strong>{selected.margin}%</strong>
                 </div>
-              </div>
-              <div className="detail-row">
-                <span className="muted">Stock coverage</span>
-                <div className="progress" aria-label={`${selected.velocity} percent sales velocity`}>
-                  <span style={{ width: `${selected.velocity}%` }} />
-                </div>
-              </div>
-              <div className="detail-row">
-                <span className="muted">Suggested action</span>
-                <span className="strong">
-                  {selected.stock <= selected.reorder
-                    ? 'Open a supplier purchase order'
-                    : 'Keep current reorder point'}
-                </span>
-              </div>
-              <div className="detail-row">
-                <span className="muted">Live orders</span>
+                <CProgress className="mb-4">
+                  <CProgressBar value={selected.margin} color="info" />
+                </CProgress>
+                <CBadge color={badgeColor(selected.status)}>{selected.status}</CBadge>
+              </CCardBody>
+            </CCard>
+
+            <CCard>
+              <CCardHeader>
+                <strong>Live orders</strong>
+              </CCardHeader>
+              <CCardBody className="stockroom-orders">
                 {orders.map((order) => (
-                  <span className="split-row" key={order.id}>
-                    <span>
-                      <span className="strong">{order.id}</span> {order.customer}
-                    </span>
-                    <span className={`status ${getStatusClass(order.state)}`}>{order.state}</span>
-                  </span>
+                  <div className="stockroom-order" key={order.id}>
+                    <div>
+                      <div className="fw-semibold">{order.id}</div>
+                      <div className="small text-medium-emphasis">
+                        {order.customer} · {order.channel}
+                      </div>
+                    </div>
+                    <div className="text-end">
+                      <div>{currency.format(order.value)}</div>
+                      <CBadge color={badgeColor(order.state)}>{order.state}</CBadge>
+                    </div>
+                  </div>
                 ))}
-              </div>
-              <div className="detail-row">
-                <span className="muted">Ops checklist</span>
-                <span className="split-row">
-                  Supplier lead time verified
-                  <CheckCircle2 size={16} aria-hidden="true" />
-                </span>
-                <span className="split-row">
-                  Returns impact reviewed
-                  <CheckCircle2 size={16} aria-hidden="true" />
-                </span>
-              </div>
-            </div>
-          </aside>
-        </section>
-      </div>
+              </CCardBody>
+            </CCard>
+          </CCol>
+        </CRow>
+      </CContainer>
     </main>
   )
 }
